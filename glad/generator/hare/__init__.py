@@ -35,16 +35,22 @@ _HARE_TYPE_MAPPING = {
     'GLboolean': 'u8',
     'GLvoid': 'void',
     'GLbyte': 'i8',
+    'GLchar': 'i8',
     'GLshort': 'i16',
     'GLint': 'i32',
+    'GLint64': 'i64',
     'GLubyte': 'u8',
     'GLushort': 'u16',
-    'GLuint': 'u32',
+    'GLuint': 'uint',
+    'GLuint64': 'u64',
     'GLsizei': 'i32',
     'GLfloat': 'f32',
     'GLclampf': 'f64',
     'GLdouble': 'f64',
     'GLclampd': 'f64',
+    'GLintptr': 'size',
+    'GLsizeiptr': 'uintptr',
+    'GLsync': 'size',
 }
 
 
@@ -151,7 +157,7 @@ def to_hare_type(type_):
         # TODO: Implement array types when there is a way to test them
         raise NotImplementedError
 
-    return ' '.join(e.strip() for e in (prefix, type_)).strip()
+    return ''.join([prefix, type_.strip()]).strip()
 
 
 def to_hare_params(command, mode='full'):
@@ -169,7 +175,7 @@ def to_hare_params(command, mode='full'):
 
 
 def identifier(name):
-    if name in ('type', 'offset'):
+    if name in ('type', 'offset', 'size'):
         return name + '_'
     return name
 
