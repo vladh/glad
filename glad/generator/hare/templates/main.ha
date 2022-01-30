@@ -2,12 +2,12 @@
 use strings;
 
 // Loader
-@symbol("glXGetProcAddress") fn glXGetProcAddress(procName: *const u8) *void;
+@symbol("eglGetProcAddress") fn eglGetProcAddress(procName: *const u8) *void;
 
 fn get_proc_address(name: str) *void = {
 	let c_str = strings::to_c(name);
 	defer { free(c_str); };
-	return glXGetProcAddress(c_str: *const u8);
+	return eglGetProcAddress(c_str: *const u8);
 };
 
 // Types
