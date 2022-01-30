@@ -239,6 +239,6 @@ class HareGenerator(JinjaGenerator):
 
     def get_templates(self, spec, feature_set, config):
         return [
-            ('main.ha', 'hare-{}/src/{}.ha'.format(feature_set.name, spec.name))
+            ('main.ha', 'hare-{}/{}.ha'.format(feature_set.name, spec.name))
         ]
 
