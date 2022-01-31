@@ -1,6 +1,5 @@
 {% set ctx_name = feature_set.name | capitalize %}
-use strings;
-use rt;
+use types;
 
 // Built-in loader
 @symbol("eglGetProcAddress") fn eglGetProcAddress(procName: *const u8) *void;
@@ -30,18 +29,8 @@ export let {{ command.name }}: *fp_{{ command.name }} =
 
 // Function loading with built-in loader
 export fn load() void = {
-	let cstr_buf = rt::malloc(2048): nullable *[*]u8;
-	let cstr_buf = match (cstr_buf) {
-	case null =>
-		abort("Out of memory");
-	case let p: *[*]u8 =>
-		yield p;
-	};
-	defer { free(cstr_buf); };
-
 	{% for command in feature_set.commands %}
-	{# Assumption: no function name will be longer than 2047 characters #}
-	let cstr = strings::to_c_with_buf("{{ command.name }}", cstr_buf): *const u8;
+	let cstr = ((&"{{ command.name }}\0"): *types::string).data: *const u8;
 	{{ command.name }} = get_proc_address("{{ command.name }}", cstr): *fp_{{ command.name }};
 	{% endfor %}
 };
@@ -50,18 +39,8 @@ export fn load() void = {
 export type fp_get_proc_address = fn(procName: *const u8) *void;
 
 export fn load_with_fn(user_get_proc_address: *fp_get_proc_address) void = {
-	let cstr_buf = rt::malloc(2048): nullable *[*]u8;
-	let cstr_buf = match (cstr_buf) {
-	case null =>
-		abort("Out of memory");
-	case let p: *[*]u8 =>
-		yield p;
-	};
-	defer { free(cstr_buf); };
-
 	{% for command in feature_set.commands %}
-	{# Assumption: no function name will be longer than 2047 characters #}
-	let cstr = strings::to_c_with_buf("{{ command.name }}", cstr_buf): *const u8;
+	let cstr = ((&"{{ command.name }}\0"): *types::string).data: *const u8;
 	{{ command.name }} = user_get_proc_address(cstr): *fp_{{ command.name }};
 	{% endfor %}
 };
