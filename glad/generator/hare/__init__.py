@@ -175,7 +175,7 @@ def to_hare_params(command, mode='full'):
 
 
 def identifier(name):
-    if name in ('type', 'offset', 'size'):
+    if name in ('type', 'offset', 'size', 'len'):
         return name + '_'
     return name
 
