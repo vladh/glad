@@ -36,21 +36,34 @@ _HARE_TYPE_MAPPING = {
     'GLvoid': 'void',
     'GLbyte': 'i8',
     'GLchar': 'i8',
+    'GLcharARB': 'i8',
     'GLshort': 'i16',
     'GLint': 'i32',
     'GLint64': 'i64',
+    'GLint64EXT': 'i64',
     'GLubyte': 'u8',
     'GLushort': 'u16',
     'GLuint': 'uint',
     'GLuint64': 'u64',
+    'GLuint64EXT': 'u64',
     'GLsizei': 'i32',
     'GLfloat': 'f32',
     'GLclampf': 'f64',
     'GLdouble': 'f64',
     'GLclampd': 'f64',
     'GLintptr': 'size',
+    'GLintptrARB': 'size',
+    'GLvdpauSurfaceNV': 'size',
     'GLsizeiptr': 'uintptr',
+    'GLsizeiptrARB': 'uintptr',
     'GLsync': 'size',
+    'GLfixed': 'i32',
+    'GLhandleARB': 'uint',
+    'GLhalfNV': 'u16',
+    'GLeglImageOES': '*const void',
+    'GLeglClientBufferEXT': '*void',
+    '_cl_context': 'void', # opaque struct
+    '_cl_event': 'void', # opaque struct
 }
 
 
@@ -151,13 +164,13 @@ def to_hare_type(type_):
         else:
             prefix = '*' * parsed_type.is_pointer
 
-    type_ = _HARE_TYPE_MAPPING.get(parsed_type.type, parsed_type.type)
+    type_ = _HARE_TYPE_MAPPING.get(parsed_type.type.strip(), parsed_type.type.strip())
 
     if parsed_type.is_array > 0:
         # TODO: Implement array types when there is a way to test them
         raise NotImplementedError
 
-    return ''.join([prefix, type_.strip()]).strip()
+    return ''.join([prefix, type_]).strip()
 
 
 def to_hare_params(command, mode='full'):

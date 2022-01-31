@@ -36,3 +36,4 @@ export type GLDEBUGPROCAMD = fn(
 	message: *const i8,
 	userParam: *void
 ) void;
+export type GLVULKANPROCNV = fn() void;

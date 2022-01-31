@@ -40,7 +40,7 @@ export fn load() void = {
 	defer { free(cstr_buf); };
 
 	{% for command in feature_set.commands %}
-	assert(len("{{ command.name }}") < 2048);
+	{# Assumption: no function name will be longer than 2047 characters #}
 	let cstr = strings::to_c_with_buf("{{ command.name }}", cstr_buf): *const u8;
 	{{ command.name }} = get_proc_address("{{ command.name }}", cstr): *fp_{{ command.name }};
 	{% endfor %}
@@ -60,7 +60,7 @@ export fn load_with_fn(user_get_proc_address: *fp_get_proc_address) void = {
 	defer { free(cstr_buf); };
 
 	{% for command in feature_set.commands %}
-	assert(len("{{ command.name }}") < 2048);
+	{# Assumption: no function name will be longer than 2047 characters #}
 	let cstr = strings::to_c_with_buf("{{ command.name }}", cstr_buf): *const u8;
 	{{ command.name }} = user_get_proc_address(cstr): *fp_{{ command.name }};
 	{% endfor %}
