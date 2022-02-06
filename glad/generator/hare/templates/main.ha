@@ -14,7 +14,7 @@ fn get_proc_address(proc_name: str) *void = {
 
 // Constants
 {% for enum in feature_set.enums %}
-export def {{ enum.name|no_prefix }}: {{ enum|enum_type }} = {{ enum|enum_value }};
+export def {{ enum.name }}: {{ enum|enum_type }} = {{ enum|enum_value }};
 {% endfor %}
 
 // Function pointers
