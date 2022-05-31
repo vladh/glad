@@ -14,7 +14,7 @@ from glad.sink import LoggingSink
 
 _HARE_TYPE_MAPPING = {
     'void': 'void',
-    'char': 'i8',
+    # 'char': 'i8',
     'uchar': 'u8',
     'float': 'f32',
     'double': 'f64',
@@ -145,7 +145,7 @@ def enum_value(enum, feature_set):
         value = value[:-1]
 
     for old, new in (('(', ''), (')', ''), ('f', ''),
-                     ('U', ''), ('L', ''), ('~', '!')):
+                     ('U', ''), ('L', '')):
         value = value.replace(old, new)
 
     return value
@@ -160,15 +160,14 @@ def to_hare_type(type_):
     prefix = ''
     if parsed_type.is_pointer > 0:
         if parsed_type.is_const:
-            prefix = '*const ' * parsed_type.is_pointer
+            prefix = 'nullable *const ' * parsed_type.is_pointer
         else:
-            prefix = '*' * parsed_type.is_pointer
+            prefix = 'nullable *' * parsed_type.is_pointer
 
     type_ = _HARE_TYPE_MAPPING.get(parsed_type.type.strip(), parsed_type.type.strip())
 
     if parsed_type.is_array > 0:
-        # TODO: Implement array types when there is a way to test them
-        raise NotImplementedError
+        type_ = '[{}]{}'.format(parsed_type.is_array, type_)
 
     return ''.join([prefix, type_]).strip()
 
@@ -188,9 +187,38 @@ def to_hare_params(command, mode='full'):
 
 
 def identifier(name):
-    if name in ('type', 'offset', 'size', 'len'):
+    if name in ('type', 'offset', 'size', 'len', 'i64', 'u64', 'f64'):
         return name + '_'
     return name
+
+def is_descendant(type_, targettype, ignoretypes, spec):
+    if type_.type is None or spec.types[type_.type] is None:
+        return False
+
+    if ignoretypes != None:
+        for curignore in ignoretypes:
+            if spec.types[type_.type][0].is_descendant(curignore, spec.types):
+                return False
+
+    return spec.types[type_.type][0].is_descendant(targettype, spec.types)
+
+def find_enum(enumtype, target):
+    for curenum in enumtype.enums:
+        if curenum.name == target:
+            return curenum
+    return None
+
+def alias_to_value(alias, type_):
+    if alias is None:
+        raise ValueError('alias is invalid')
+
+    curenum = find_enum(type_, alias)
+    if curenum is None:
+        raise ValueError('failed to resolve alias for ' + alias)
+
+    while (curenum.alias is not None):
+        curenum = find_enum(type_, curenum.alias)
+    return curenum.value
 
 
 class HareConfig(Config):
@@ -224,7 +252,9 @@ class HareGenerator(JinjaGenerator):
             type=to_hare_type,
             params=to_hare_params,
             identifier=identifier,
-            no_prefix=jinja2.contextfilter(lambda ctx, value: strip_specification_prefix(value, ctx['spec']))
+            no_prefix=jinja2.contextfilter(lambda ctx, value: strip_specification_prefix(value, ctx['spec'])),
+            is_descendant=jinja2.contextfilter(lambda ctx, type_, target, ignoretypes = None: is_descendant(type_, target, ignoretypes, ctx['spec'])),
+            alias_to_value=alias_to_value,
         )
 
     @property
@@ -252,6 +282,6 @@ class HareGenerator(JinjaGenerator):
 
     def get_templates(self, spec, feature_set, config):
         return [
-            ('main.ha', '{}/{}.ha'.format(feature_set.name, spec.name))
+            ('{}.ha'.format(spec.name), '{}/{}.ha'.format(spec.name, spec.name))
         ]
 
