@@ -1,13 +1,31 @@
-// types required for: xcb
+{% import 'template_utils.ha' as template_utils with context %}
+
+// XCB
 export type xcb_connection_t = nullable *void;
 export type xcb_window_t = u32;
 export type xcb_visualid_t = u32;
-// types required for: xlib(_xrandr)
+export type zx_handle_t = u32;
+
+// Android (somehow already defined)
+// export type ANativeWindow = nullable *void;
+// export type AHardwareBuffer = nullable *void;
+
+// iOS / macOS (some are somehow already defined)
+// export type CAMetalLayer = nullable *void;
+export type GgpFrameToken = u32;
+export type GgpStreamDescriptor = u32;
+
+// DirectFB
+export type IDirectFB = nullable *void;
+export type IDirectFBSurface = nullable *void;
+
+// xlib (_xrandr)
 export type Display = nullable *void;
 export type RROutput = u32;
 export type Window = u32;
 export type VisualID = u32;
-// types required for: win32
+
+// Win32
 export type BOOL = i32;
 export type DWORD = u32;
 export type LPVOID = nullable *void;
@@ -22,10 +40,12 @@ export type SECURITY_ATTRIBUTES = struct {
     lpSecurityDescriptor: LPVOID,
     bInheritHandle: BOOL,
 };
-// types required for: wayland
+
+// Wayland
 export type wl_display = nullable *void;
 export type wl_surface = nullable *void;
-// types required for: mir
+
+// Mir
 export type MirConnection = nullable *void;
 export type MirSurface = nullable *void;
 
@@ -61,6 +81,7 @@ export type {{ type.name }} = nullable *void;
 {% elif type.category == 'enum' %}
 {% set members = type.enums_for(feature_set) %}
 {% if members %}
+{% call template_utils.protect(type) %}
 export type {{ type.name }} = enum u{{ type.bitwidth or 32 }} {
 {% for member in members %}
 {% if not member.alias %}
@@ -70,6 +91,7 @@ export type {{ type.name }} = enum u{{ type.bitwidth or 32 }} {
 {% endif %}
 {% endfor %}
 };
+{% endcall %}
 export fn Str{{ type.name }}(value: {{ type.name }}) str = {
 	switch (value) {
 	{% for member in members %}
@@ -80,11 +102,13 @@ export fn Str{{ type.name }}(value: {{ type.name }}) str = {
 };
 {% endif %}
 {% elif type.category in ('struct', 'union') %}
+{% call template_utils.protect(type) %}
 export type {{ type.name }} = {{ type.category }} {
 {% for member in type.members %}
 	{{ member.name|identifier }}: {% if member.enum %}[{{ member.enum }}]{% endif %}{{ member.type|type }},
 {% endfor %}
 };
+{% endcall %}
 {% elif type.category == 'bitmask' %}
 export type {{ type.name }} = {{ type.type }};
 {% elif type.category == 'funcpointer' %}
