@@ -1,39 +1,39 @@
 export type gl_enum = uint;
 export type gl_bitfield = uint;
 
-export type GLDEBUGPROC = fn(
+export type GLDEBUGPROC = nullable *fn(
 	source: gl_enum,
 	type_: gl_enum,
 	id: uint,
 	severity: gl_enum,
 	length: i32,
-	message: *const i8,
-	userParam: *void
+	message: nullable *const char,
+	userParam: nullable *void
 ) void;
-export type GLDEBUGPROCARB = fn(
+export type GLDEBUGPROCARB = nullable *fn(
 	source: gl_enum,
 	type_: gl_enum,
 	id: uint,
 	severity: gl_enum,
 	length: i32,
-	message: *const i8,
-	userParam: *void
+	message: nullable *const char,
+	userParam: nullable *void
 ) void;
-export type GLDEBUGPROCKHR = fn(
+export type GLDEBUGPROCKHR = nullable *fn(
 	source: gl_enum,
 	type_: gl_enum,
 	id: uint,
 	severity: gl_enum,
 	length: i32,
-	message: *const i8,
-	userParam: *void
+	message: nullable *const char,
+	userParam: nullable *void
 ) void;
-export type GLDEBUGPROCAMD = fn(
+export type GLDEBUGPROCAMD = nullable *fn(
 	id: uint,
 	category: gl_enum,
 	severity: gl_enum,
 	length: i32,
-	message: *const i8,
-	userParam: *void
+	message: nullable *const char,
+	userParam: nullable *void
 ) void;
-export type GLVULKANPROCNV = fn() void;
+export type GLVULKANPROCNV = nullable *fn() void;
